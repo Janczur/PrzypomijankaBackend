@@ -27,16 +27,18 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      * used for the request. Returning `false` will cause this authenticator
      * to be skipped.
      */
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
-        return $request->get("_route") === "auth_login" && $request->isMethod("POST");
+        $isLoginRequest = $request->get("_route") === "auth_login" && $request->isMethod("POST");
+        $credentialsExists = $request->request->get('email') && $request->request->get('password');
+        return $isLoginRequest && $credentialsExists;
     }
 
     /**
      * Called on every request. Return whatever credentials you want to
      * be passed to getUser() as $credentials.
      */
-    public function getCredentials(Request $request)
+    public function getCredentials(Request $request): array
     {
         return [
             'email' => $request->request->get("email"),
