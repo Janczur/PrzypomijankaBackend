@@ -11,7 +11,7 @@ security:
             lazy: true
             guard:
                 authenticators:
-                    - App\Modules\Security\Service\TokenAuthenticator
+                    - App\Modules\Security\Service\UserAuthenticator
             provider: app_user_provider
             logout:
                 path: auth_logout

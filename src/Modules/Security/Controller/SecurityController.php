@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -18,14 +19,10 @@ class SecurityController extends AbstractController
     /**
      * @Route("/login", name="login", methods={"POST"})
      */
-    public function login(): JsonResponse
+    public function login(SerializerInterface $serializer): JsonResponse
     {
-        return $this->json([
-            'message' => 'success',
-            'user' => $this->getUser()
-        ], 200, [], [
-            'groups' => ['user']
-        ]);
+        $normalizedUser = $serializer->normalize($this->getUser(), 'json', ['groups' => 'user:read']);
+        return $this->json($normalizedUser);
     }
 
     /**
@@ -41,10 +38,11 @@ class SecurityController extends AbstractController
      * @Route("/register", name="register", methods={"POST"})
      */
     public function register(
-        EntityManagerInterface $em,
-        UserPasswordEncoderInterface $passwordEncoder,
         Request $request,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        UserPasswordEncoderInterface $passwordEncoder,
+        EntityManagerInterface $em,
+        SerializerInterface $serializer
     ): JsonResponse
     {
         $constraint = new Assert\Collection([
@@ -54,10 +52,7 @@ class SecurityController extends AbstractController
         ]);
         $violations = $validator->validate($request->request->all(), $constraint);
         if (0 !== count($violations)){
-            return $this->json([
-                'message' => 'error',
-                'errors' => $violations
-            ], 400);
+            return $this->json($violations, 400);
         }
         $user = new User();
         $user->setName($request->request->get("name"));
@@ -67,11 +62,7 @@ class SecurityController extends AbstractController
 
         $em->persist($user);
         $em->flush();
-        return $this->json([
-            'message' => 'success',
-            'user' => $user
-        ], 200, [], [
-            'groups' => ['user']
-        ]);
+        $normalizedUser = $serializer->normalize($user, 'json', ['groups' => 'user:read']);
+        return $this->json($normalizedUser);
     }
 }

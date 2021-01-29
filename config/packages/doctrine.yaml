@@ -22,3 +22,9 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Modules/Security/Entity'
                 prefix: 'App\Modules\Security\Entity'
                 alias: Security
+            Remembrall:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/src/Modules/Remembrall/Entity'
+                prefix: 'App\Modules\Remembrall\Entity'
+                alias: Remembrall

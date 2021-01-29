@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Tests\Feature;
+namespace App\Tests\Feature\Modules\Security\Controller;
 
 
 use App\Modules\Security\Entity\User;
@@ -20,30 +20,28 @@ class SecurityControllerTest extends WebTestCase
             'email' => $user->getEmail(),
             'password' => $user->getPassword()
         ]);
+        $registerResponseBody = json_decode($client->getResponse()->getContent(), true);
         self::assertEquals(200, $client->getResponse()->getStatusCode());
-        $registerResponse = json_decode($client->getResponse()->getContent(), true);
-        self::assertEquals('success', $registerResponse['message']);
-        self::assertEquals($user->getName(), $registerResponse['user']['name']);
-        self::assertEquals($user->getEmail(), $registerResponse['user']['email']);
-        self::assertArrayNotHasKey('password', $registerResponse['user']);
+        self::assertEquals($user->getName(), $registerResponseBody['name']);
+        self::assertEquals($user->getEmail(), $registerResponseBody['email']);
+        self::assertArrayNotHasKey('password', $registerResponseBody);
 
         $client->request('POST', '/auth/login', [
             'email' => $user->getEmail(),
             'password' => $user->getPassword()
         ]);
+        $loginResponseBody = json_decode($client->getResponse()->getContent(), true);
         self::assertEquals(200, $client->getResponse()->getStatusCode());
-        $loginResponse = json_decode($client->getResponse()->getContent(), true);
-        self::assertEquals('success', $loginResponse['message']);
-        self::assertEquals($user->getName(), $loginResponse['user']['name']);
-        self::assertEquals($user->getEmail(), $loginResponse['user']['email']);
-        self::assertArrayNotHasKey('password', $loginResponse['user']);
+        self::assertEquals($user->getName(), $loginResponseBody['name']);
+        self::assertEquals($user->getEmail(), $loginResponseBody['email']);
+        self::assertArrayNotHasKey('password', $loginResponseBody);
     }
 
     private function getTestUser(): User
     {
         return (new User())
-            ->setName('Test')
-            ->setEmail('test@test.pl')
+            ->setName('User for test')
+            ->setEmail('userfortest@testtest.pl')
             ->setPassword('secret');
     }
 
@@ -52,10 +50,10 @@ class SecurityControllerTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', '/auth/register');
-        $response = json_decode($client->getResponse()->getContent(), true);
+        $responseBody = json_decode($client->getResponse()->getContent(), true);
 
-        self::assertEquals('error', $response['message']);
-        self::assertCount(3, $response['errors']['violations']);
+        self::assertEquals(400, $client->getResponse()->getStatusCode());
+        self::assertCount(3, $responseBody['violations']);
     }
 
     /** @test */
@@ -68,10 +66,10 @@ class SecurityControllerTest extends WebTestCase
             'email' => $user->getEmail(),
             'password' => $user->getPassword()
         ]);
-        $response = json_decode($client->getResponse()->getContent(), true);
+        $responseBody = json_decode($client->getResponse()->getContent(), true);
 
-        self::assertEquals('error', $response['message']);
-        self::assertEquals('[name]: This value is too short. It should have 3 characters or more.', $response['errors']['detail']);
+        self::assertEquals(400, $client->getResponse()->getStatusCode());
+        self::assertEquals('[name]: This value is too short. It should have 3 characters or more.', $responseBody['detail']);
     }
 
     /** @test */
@@ -84,10 +82,10 @@ class SecurityControllerTest extends WebTestCase
             'email' => 'test@test',
             'password' => $user->getPassword()
         ]);
-        $response = json_decode($client->getResponse()->getContent(), true);
+        $responseBody = json_decode($client->getResponse()->getContent(), true);
 
-        self::assertEquals('error', $response['message']);
-        self::assertEquals('[email]: This value is not a valid email address.', $response['errors']['detail']);
+        self::assertEquals(400, $client->getResponse()->getStatusCode());
+        self::assertEquals('[email]: This value is not a valid email address.', $responseBody['detail']);
     }
 
     /** @test */

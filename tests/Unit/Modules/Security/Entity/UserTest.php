@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Modules\Security\Entity;
+namespace App\Tests\Unit\Modules\Security\Entity;
 
 use App\Modules\Security\Entity\User;
 use PHPUnit\Framework\TestCase;

@@ -2,7 +2,10 @@
 
 namespace App\Modules\Security\Entity;
 
+use App\Modules\Remembrall\Entity\Reminder;
 use App\Modules\Security\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -17,27 +20,27 @@ class User implements UserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups("user")
+     * @Groups("user:read")
      */
     private int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("user")
+     * @Groups("user:read")
      * @Assert\Length(min=3,max=255)
      */
     private string $name;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups("user")
+     * @Groups("user:read")
      * @Assert\Email
      */
     private string $email;
 
     /**
      * @ORM\Column(type="json")
-     * @Groups("user")
+     * @Groups("user:read")
      */
     private array $roles = [];
 
@@ -46,6 +49,16 @@ class User implements UserInterface
      * @ORM\Column(type="string")
      */
     private string $password;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Reminder::class, mappedBy="user", orphanRemoval=true, fetch="LAZY")
+     */
+    private Collection $reminders;
+
+    public function __construct()
+    {
+        $this->reminders = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -133,6 +146,36 @@ class User implements UserInterface
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Reminder[]
+     */
+    public function getReminders(): Collection
+    {
+        return $this->reminders;
+    }
+
+    public function addReminder(Reminder $reminder): self
+    {
+        if (!$this->reminders->contains($reminder)) {
+            $this->reminders[] = $reminder;
+            $reminder->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReminder(Reminder $reminder): self
+    {
+        if ($this->reminders->removeElement($reminder)) {
+            // set the owning side to null (unless already changed)
+            if ($reminder->getUser() === $this) {
+                $reminder->setUser(null);
+            }
+        }
 
         return $this;
     }

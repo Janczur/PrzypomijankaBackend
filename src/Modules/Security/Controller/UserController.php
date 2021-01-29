@@ -6,10 +6,12 @@ namespace App\Modules\Security\Controller;
 
 use App\Modules\Security\Entity\User;
 use App\Modules\Security\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * @Route("/users", name="users_")
@@ -19,9 +21,12 @@ class UserController extends AbstractController
 {
     private UserRepository $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    private SerializerInterface $serializer;
+
+    public function __construct(UserRepository $userRepository, SerializerInterface $serializer)
     {
         $this->userRepository = $userRepository;
+        $this->serializer = $serializer;
     }
 
     /**
@@ -29,12 +34,9 @@ class UserController extends AbstractController
      */
     public function index(): JsonResponse
     {
-        return $this->json([
-            'message' => 'success',
-            'users' => $this->userRepository->findAll()
-        ], 200, [], [
-            'groups' => ['user']
-        ]);
+        $users = $this->userRepository->findAll();
+        $normalizedUsers = $this->serializer->normalize($users, 'json', ['groups' => 'user:read']);
+        return $this->json($normalizedUsers);
     }
 
     /**
@@ -43,20 +45,15 @@ class UserController extends AbstractController
      */
     public function show(User $user): JsonResponse
     {
-        return $this->json([
-            'message' => 'success',
-            'user' => $user
-        ], 200, [], [
-            'groups' => ['user']
-        ]);
+        $normalizedUser = $this->serializer->normalize($user, 'json', ['groups' => 'user:read']);
+        return $this->json($normalizedUser);
     }
     /**
      * @Route("/{id}/delete", name="delete", requirements={"id"="\d+"}, methods={"DELETE"})
      * @return JsonResponse
      */
-    public function delete(User $user): JsonResponse
+    public function delete(User $user, EntityManagerInterface $em): JsonResponse
     {
-        $em = $this->getDoctrine()->getManager();
         $em->remove($user);
         $em->flush();
         return $this->json(['message' => 'success']);

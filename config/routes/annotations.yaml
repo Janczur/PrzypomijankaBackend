@@ -6,6 +6,10 @@ security.controllers:
     resource: ../../src/Modules/Security/Controller/
     type: annotation
 
+remembrall.controllers:
+    resource: ../../src/Modules/Remembrall/Controller/
+    type: annotation
+
 kernel:
     resource: ../../src/Kernel.php
     type: annotation
