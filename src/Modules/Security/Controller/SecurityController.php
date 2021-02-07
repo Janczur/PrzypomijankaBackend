@@ -10,8 +10,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /** @Route("/auth", name="auth_") */
 class SecurityController extends AbstractController
@@ -51,7 +51,7 @@ class SecurityController extends AbstractController
             'password' => new Assert\Length(['min' => 6]),
         ]);
         $violations = $validator->validate($request->request->all(), $constraint);
-        if (0 !== count($violations)){
+        if (0 !== count($violations)) {
             return $this->json($violations, 400);
         }
         $user = new User();

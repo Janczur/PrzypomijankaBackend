@@ -26,7 +26,7 @@ class CyclicType
      * @Groups("reminder:read")
      * @Assert\Choice(callback={"App\Modules\Remembrall\Abstracts\CyclicTypes", "getTypeNames"})
      */
-    private ?string $name;
+    private string $name;
 
     /**
      * @ORM\OneToMany(targetEntity=Cyclic::class, mappedBy="type")
@@ -43,7 +43,7 @@ class CyclicType
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -83,5 +83,10 @@ class CyclicType
         }
 
         return $this;
+    }
+
+    public function getFirstLetterOfTypeName(): string
+    {
+        return $this->name[0];
     }
 }

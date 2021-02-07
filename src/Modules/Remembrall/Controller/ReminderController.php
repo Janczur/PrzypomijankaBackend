@@ -62,7 +62,7 @@ class ReminderController extends AbstractController
         if ($validationErrors = $this->validateReminder($reminder)) {
             return $this->json($validationErrors, 400);
         }
-        if ($reminder->isCyclic()){
+        if ($reminder->isCyclic()) {
             $cyclicType = $em->getRepository(CyclicType::class)->findOneBy(
                 ['name' => $reminder->getCyclic()->getType()->getName()]
             );
@@ -81,7 +81,7 @@ class ReminderController extends AbstractController
         if (count($reminderValidationErrors) > 0) {
             return $reminderValidationErrors;
         }
-        if (!$reminder->isCyclic()){
+        if (!$reminder->isCyclic()) {
             return false;
         }
         $cyclicValidationErrors = $this->validator->validate($reminder->getCyclic());
@@ -105,7 +105,7 @@ class ReminderController extends AbstractController
         if ($validationErrors = $this->validateReminder($updatedReminder)) {
             return $this->json($validationErrors, 400);
         }
-        if ($reminder->isCyclic()){
+        if ($reminder->isCyclic()) {
             $cyclicType = $em->getRepository(CyclicType::class)->findOneBy(
                 ['name' => $updatedReminder->getCyclic()->getType()->getName()]
             );

@@ -4,6 +4,7 @@ namespace App\Modules\Remembrall\Entity;
 
 use App\Modules\Remembrall\Repository\ReminderRepository;
 use App\Modules\Security\Entity\User;
+use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -15,14 +16,20 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Reminder
 {
-    const SUPPORTED_CHANNELS = ['email', 'sms'];
+    public const EMAIL_CHANNEL = 'email';
+    public const SMS_CHANNEL = 'sms';
+    
+    public const SUPPORTED_CHANNELS = [
+        self::EMAIL_CHANNEL,
+        self::SMS_CHANNEL
+    ];
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups("reminder:read")
      */
-    private ?int $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -48,7 +55,7 @@ class Reminder
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="reminders")
      * @ORM\JoinColumn(nullable=false)
      */
-    private ?UserInterface $user;
+    private UserInterface $user;
 
     /**
      * @ORM\Column(type="datetime")
@@ -94,7 +101,7 @@ class Reminder
 
     public function __construct()
     {
-        $this->setCreatedAt(new \DateTime());
+        $this->setCreatedAt(new DateTime());
     }
 
     public function getId(): ?int
@@ -150,12 +157,12 @@ class Reminder
         return $this;
     }
 
-    public function getPreRemindAt(): ?\DateTimeInterface
+    public function getPreRemindAt(): ?DateTimeInterface
     {
         return $this->pre_remind_at;
     }
 
-    public function setPreRemindAt(?\DateTimeInterface $pre_remind_at): self
+    public function setPreRemindAt(?DateTimeInterface $pre_remind_at): self
     {
         $this->pre_remind_at = $pre_remind_at;
 
@@ -174,17 +181,17 @@ class Reminder
         return $this;
     }
 
-    public function getOwner(): ?UserInterface
+    public function getOwner(): UserInterface
     {
         return $this->user;
     }
 
-    public function getUser(): ?UserInterface
+    public function getUser(): UserInterface
     {
         return $this->user;
     }
 
-    public function setUser(?UserInterface $user): self
+    public function setUser(UserInterface $user): self
     {
         $this->user = $user;
 

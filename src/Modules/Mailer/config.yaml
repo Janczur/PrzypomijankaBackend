@@ -1,0 +1,11 @@
+parameters:
+    mail.from: '%env(MAIL_FROM)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\Modules\Mailer\EventSubscriber\SetMailFromEventSubscriber:
+        arguments:
+            $mailFrom: '%mail.from%'

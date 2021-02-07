@@ -9,15 +9,13 @@ abstract class CyclicTypes
     public const DAY = 1;
     public const WEEK = 2;
     public const MONTH = 3;
-    public const QUARTER = 4;
-    public const YEAR = 5;
+    public const YEAR = 4;
 
     public static array $display = [
-        self::DAY => 'Dzień',
-        self::WEEK => 'Tydzień',
-        self::MONTH => 'Miesiąc',
-        self::QUARTER => 'Kwartał',
-        self::YEAR => 'Rok',
+        self::DAY => 'Day',
+        self::WEEK => 'Week',
+        self::MONTH => 'Month',
+        self::YEAR => 'Year',
     ];
 
     public static function getTypeNames(): array

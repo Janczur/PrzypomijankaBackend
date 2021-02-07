@@ -24,33 +24,33 @@ class Cyclic
      * @ORM\JoinColumn(nullable=false)
      * @Groups("reminder:read")
      */
-    private ?CyclicType $type;
+    private CyclicType $type;
 
     /**
      * @ORM\Column(type="integer")
      * @Assert\Positive()
      * @Groups("reminder:read")
      */
-    private ?int $periodicity;
+    private int $periodicity;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getType(): ?CyclicType
+    public function getType(): CyclicType
     {
         return $this->type;
     }
 
-    public function setType(?CyclicType $type): self
+    public function setType(CyclicType $type): self
     {
         $this->type = $type;
 
         return $this;
     }
 
-    public function getPeriodicity(): ?int
+    public function getPeriodicity(): int
     {
         return $this->periodicity;
     }

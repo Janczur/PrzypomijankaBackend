@@ -3,6 +3,7 @@
 namespace App\Modules\Remembrall\Repository;
 
 use App\Modules\Remembrall\Entity\Reminder;
+use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -12,39 +13,39 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Reminder[]    findAll()
  * @method Reminder[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ReminderRepository extends ServiceEntityRepository
+class ReminderRepository extends ServiceEntityRepository implements ReminderRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Reminder::class);
     }
 
-    // /**
-    //  * @return Reminder[] Returns an array of Reminder objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @inheritDoc
+     */
+    public function getAllPreRemindersToBeSendBetween(DateTimeInterface $from, DateTimeInterface $to): array
     {
         return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('r.id', 'ASC')
-            ->setMaxResults(10)
+            ->andWhere('r.pre_remind_at BETWEEN :from AND :to')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->andWhere('r.pre_reminded = 0')
+            ->andWhere('r.active = 1')
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Reminder
+    /**
+     * @inheritDoc
+     */
+    public function getAllRemindersToBeSendBetween(DateTimeInterface $from, DateTimeInterface $to): array
     {
         return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
+            ->andWhere('r.remind_at BETWEEN :from AND :to')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->andWhere('r.active = 1')
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getResult();
     }
-    */
 }

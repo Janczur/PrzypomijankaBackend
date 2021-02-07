@@ -48,6 +48,7 @@ class UserController extends AbstractController
         $normalizedUser = $this->serializer->normalize($user, 'json', ['groups' => 'user:read']);
         return $this->json($normalizedUser);
     }
+
     /**
      * @Route("/{id}/delete", name="delete", requirements={"id"="\d+"}, methods={"DELETE"})
      * @return JsonResponse
