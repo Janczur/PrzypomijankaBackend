@@ -40,7 +40,7 @@ class ReminderFixtures extends Fixture implements DependentFixtureInterface
             $reminder->setUser($user);
             $reminder->setRemindAt($remindAt);
             $reminder->setPreRemindAt($remindAt);
-            $reminder->setChannels(['email']);
+            $reminder->setChannels(Reminder::SUPPORTED_CHANNELS);
             if ($i === 0 || $i === 1 || $i === 2 || $i === 3) {
                 $cyclic = $this->getReference(CyclicFixtures::getReferenceKey($i));
             } else {
