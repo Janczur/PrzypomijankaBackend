@@ -3,7 +3,8 @@
   <h1 align="center">Przypomijanka - Backend API</h1>
 
   <p align="center">
-    Application for sending reminders to users
+    Application for sending reminders to users<br>
+    See <a href="https://miro.com/app/board/o9J_lZkbTHI=/">Design View</a> to learn about the processes and understand how the system works
   </p>
 </div>
 
