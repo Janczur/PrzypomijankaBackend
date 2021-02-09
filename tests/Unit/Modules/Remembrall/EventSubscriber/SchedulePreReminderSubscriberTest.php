@@ -30,18 +30,15 @@ class SchedulePreReminderSubscriberTest extends KernelTestCase
 
     public function setUp(): void
     {
-        $this->messageBus = $this->getMockBuilder(MessageBusInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
+        $this->messageBus = $this->createMock(MessageBusInterface::class);
         $this->dispatcher = new EventDispatcher();
-        $reminderTimeCalculator = $this->getMockBuilder(ReminderTimeCalculatorInterface::class)
-            ->getMock();
-        $scheduleReminderSubscriber = new ScheduleReminderSubscriber($this->messageBus, $reminderTimeCalculator);
-        $this->dispatcher->addSubscriber($scheduleReminderSubscriber);
         $this->reminder = $this->loadFixtures([ReminderFixtures::class])
             ->getReferenceRepository()
             ->getReference(ReminderFixtures::getReferenceKey(0));
+
+        $reminderTimeCalculator = $this->createMock(ReminderTimeCalculatorInterface::class);
+        $scheduleReminderSubscriber = new ScheduleReminderSubscriber($this->messageBus, $reminderTimeCalculator);
+        $this->dispatcher->addSubscriber($scheduleReminderSubscriber);
     }
 
     /** @test */

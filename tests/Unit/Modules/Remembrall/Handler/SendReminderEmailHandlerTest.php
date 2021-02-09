@@ -10,9 +10,7 @@ use App\Modules\Remembrall\Handler\SendReminderEmailHandler;
 use App\Modules\Remembrall\Message\SendReminderEmail;
 use App\Modules\Remembrall\Utils\ReminderTimeCalculator;
 use DateInterval;
-use DateTime;
 use Liip\TestFixturesBundle\Test\FixturesTrait;
-use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Mailer\MailerInterface;
@@ -21,42 +19,30 @@ class SendReminderEmailHandlerTest extends KernelTestCase
 {
     use FixturesTrait;
 
-    /** @var LoggerInterface|MockObject */
-    private $logger;
-
     private SendReminderEmailHandler $handler;
+    private MailerInterface $mailer;
 
     protected function setUp(): void
     {
         $kernel = self::bootKernel();
 
-        $em = $kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
-
+        $em = $kernel->getContainer()->get('doctrine')->getManager();
         $reminderRepository = $em->getRepository(Reminder::class);
-
-        $mailer = $this->getMockBuilder(MailerInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $logger = $this->getMockBuilder(LoggerInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
+        $this->mailer = $this->createMock(MailerInterface::class);
         $reminderCalculator = new ReminderTimeCalculator();
-
         $this->handler = new SendReminderEmailHandler(
             $reminderRepository,
-            $mailer,
+            $this->mailer,
             $em,
             $reminderCalculator
         );
+
+        $logger = $this->createMock(LoggerInterface::class);
         $this->handler->setLogger($logger);
     }
 
     /** @test */
-    public function it_correctly_calculates_the_date_of_the_next_reminder(): void
+    public function it_correctly_calculates_the_date_of_the_next_reminder_after_successful_send(): void
     {
         /** @var Reminder $reminder */
         $reminder = $this->loadFixtures([ReminderFixtures::class])
@@ -65,10 +51,12 @@ class SendReminderEmailHandlerTest extends KernelTestCase
         $message = new SendReminderEmail($reminder);
         $handler = $this->handler;
 
-        $expectedNextRemindAt = $reminder->getRemindAt();
-        $interval = new DateInterval('P1D');
-        $expectedNextRemindAt->add($interval);
+        $expectedNextRemindAt = $reminder->getRemindAt()->add(new DateInterval('P1D'));
+        $this->mailer->expects(self::once())->method('send');
         $handler($message);
-        self::assertEquals($expectedNextRemindAt->getTimestamp(), $reminder->getRemindAt()->getTimestamp());
+        self::assertEquals(
+            $expectedNextRemindAt->getTimestamp(), $reminder->getRemindAt()->getTimestamp(),
+            'The date of the next reminder cyclic reminder was incorrectly calculated'
+        );
     }
 }
