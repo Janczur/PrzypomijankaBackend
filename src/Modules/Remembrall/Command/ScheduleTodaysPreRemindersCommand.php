@@ -3,6 +3,7 @@
 namespace App\Modules\Remembrall\Command;
 
 use App\Modules\Remembrall\Event\SchedulePreReminderEvent;
+use App\Modules\Remembrall\Repository\PreReminderRepositoryInterface;
 use App\Modules\Remembrall\Repository\ReminderRepositoryInterface;
 use DateTime;
 use Symfony\Component\Console\Command\Command;
@@ -15,17 +16,13 @@ class ScheduleTodaysPreRemindersCommand extends Command
 {
     protected static $defaultName = 'remembrall:schedule-pre-reminders';
 
-    private ReminderRepositoryInterface $reminderRepository;
+    private PreReminderRepositoryInterface $repository;
 
     private EventDispatcherInterface $eventDispatcher;
 
-    /**
-     * @param ReminderRepositoryInterface $reminderRepository
-     * @param EventDispatcherInterface $eventDispatcher
-     */
-    public function __construct(ReminderRepositoryInterface $reminderRepository, EventDispatcherInterface $eventDispatcher)
+    public function __construct(PreReminderRepositoryInterface $repository, EventDispatcherInterface $eventDispatcher)
     {
-        $this->reminderRepository = $reminderRepository;
+        $this->repository = $repository;
         $this->eventDispatcher = $eventDispatcher;
         parent::__construct();
     }
@@ -42,7 +39,7 @@ class ScheduleTodaysPreRemindersCommand extends Command
 
         $today = new DateTime('today');
         $tomorrow = new DateTime('tomorrow');
-        $reminders = $this->reminderRepository->getAllPreRemindersToBeSendBetween($today, $tomorrow);
+        $reminders = $this->repository->getAllPreRemindersToBeSendBetween($today, $tomorrow);
         foreach ($reminders as $reminder) {
             $event = new SchedulePreReminderEvent($reminder);
             $this->eventDispatcher->dispatch($event, SchedulePreReminderEvent::NAME);

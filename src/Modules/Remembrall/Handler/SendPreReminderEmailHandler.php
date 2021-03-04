@@ -4,7 +4,6 @@ namespace App\Modules\Remembrall\Handler;
 
 use App\Modules\Remembrall\Message\SendPreReminderEmail;
 use App\Modules\Remembrall\Repository\ReminderRepositoryInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -16,29 +15,21 @@ final class SendPreReminderEmailHandler implements MessageHandlerInterface, Logg
 {
 
     private ReminderRepositoryInterface $reminderRepository;
-    private LoggerInterface $logger;
     private MailerInterface $mailer;
-    private EntityManagerInterface $em;
+    private LoggerInterface $logger;
 
-    public function __construct(
-
-        ReminderRepositoryInterface $reminderRepository,
-        MailerInterface $mailer,
-        EntityManagerInterface $em
-    )
+    public function __construct(ReminderRepositoryInterface $reminderRepository,  MailerInterface $mailer)
     {
         $this->reminderRepository = $reminderRepository;
         $this->mailer = $mailer;
-        $this->em = $em;
     }
-
 
     public function __invoke(SendPreReminderEmail $message)
     {
         $id = $message->getReminder()->getId();
         if (!$reminder = $this->reminderRepository->find($id)) {
             $this->logger->error(
-                'System nie mógł zaplanować wysłania przed przypomnienia, ponieważ przypomnienie o ID: {id} nie istnieje.',
+                'System nie mógł wysłać wiadomości email przed przypomnienia, ponieważ przypomnienie o ID: {id} nie istnieje.',
                 ['id' => $id]
             );
             return;
@@ -60,10 +51,6 @@ final class SendPreReminderEmailHandler implements MessageHandlerInterface, Logg
             );
             return;
         }
-
-        $reminder->setPreReminded(true);
-        $this->em->persist($reminder);
-        $this->em->flush();
     }
 
     public function setLogger(LoggerInterface $logger): void

@@ -18,11 +18,12 @@ class Reminder
 {
     public const EMAIL_CHANNEL = 'email';
     public const SMS_CHANNEL = 'sms';
-    
+
     public const SUPPORTED_CHANNELS = [
         self::EMAIL_CHANNEL,
         self::SMS_CHANNEL
     ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -36,14 +37,20 @@ class Reminder
      * @Groups("reminder:read")
      * @Assert\Length(min=3,max=255)
      */
-    private ?string $title;
+    private string $title;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups("reminder:read")
      * @Assert\Length(min=3,max=255)
      */
-    private ?string $description;
+    private string $description;
+
+    /**
+     * @ORM\OneToOne(targetEntity=PreReminder::class, cascade={"persist", "remove"}, fetch="LAZY")
+     * @Groups("reminder:read")
+     */
+    private ?PreReminder $pre_reminder;
 
     /**
      * @ORM\OneToOne(targetEntity=Cyclic::class, cascade={"persist", "remove"}, fetch="LAZY")
@@ -60,24 +67,10 @@ class Reminder
     /**
      * @ORM\Column(type="datetime")
      * @Groups("reminder:read")
-     * @Assert\NotBlank()
+     * @Assert\Type("DateTimeInterface")
      * @Assert\GreaterThan("tomorrow +30 minutes")
      */
-    private ?DateTimeInterface $remind_at;
-
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     * @Groups("reminder:read")
-     * @Assert\GreaterThan("tomorrow +30 minutes")
-     */
-    private ?DateTimeInterface $pre_remind_at = null;
-
-    /**
-     * @ORM\Column(type="boolean")
-     * @Groups("reminder:read")
-     */
-    private ?bool $pre_reminded = false;
-
+    private DateTimeInterface $remind_at;
 
     /**
      * @ORM\Column(type="simple_array")
@@ -91,13 +84,13 @@ class Reminder
      * @Assert\Type("boolean")
      * @Groups("reminder:read")
      */
-    private ?bool $active = true;
+    private bool $active = true;
 
     /**
      * @ORM\Column(type="datetime")
      * @Groups("reminder:read")
      */
-    private ?DateTimeInterface $created_at;
+    private DateTimeInterface $created_at;
 
     public function __construct()
     {
@@ -114,10 +107,9 @@ class Reminder
         return $this->title;
     }
 
-    public function setTitle(?string $title): self
+    public function setTitle(string $title): self
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -126,9 +118,20 @@ class Reminder
         return $this->description;
     }
 
-    public function setDescription(?string $description): self
+    public function setDescription(string $description): self
     {
         $this->description = $description;
+        return $this;
+    }
+
+    public function getPreReminder(): ?PreReminder
+    {
+        return $this->pre_reminder;
+    }
+
+    public function setPreReminder(?PreReminder $pre_reminder): self
+    {
+        $this->pre_reminder = $pre_reminder;
 
         return $this;
     }
@@ -141,7 +144,6 @@ class Reminder
     public function setCyclic(?Cyclic $cyclic): self
     {
         $this->cyclic = $cyclic;
-
         return $this;
     }
 
@@ -153,31 +155,6 @@ class Reminder
     public function setRemindAt(DateTimeInterface $remind_at): self
     {
         $this->remind_at = $remind_at;
-
-        return $this;
-    }
-
-    public function getPreRemindAt(): ?DateTimeInterface
-    {
-        return $this->pre_remind_at;
-    }
-
-    public function setPreRemindAt(?DateTimeInterface $pre_remind_at): self
-    {
-        $this->pre_remind_at = $pre_remind_at;
-
-        return $this;
-    }
-
-    public function getPreReminded(): ?bool
-    {
-        return $this->pre_reminded;
-    }
-
-    public function setPreReminded(bool $pre_reminded): self
-    {
-        $this->pre_reminded = $pre_reminded;
-
         return $this;
     }
 
@@ -194,11 +171,10 @@ class Reminder
     public function setUser(UserInterface $user): self
     {
         $this->user = $user;
-
         return $this;
     }
 
-    public function getChannels(): ?array
+    public function getChannels(): array
     {
         return $this->channels;
     }
@@ -206,7 +182,6 @@ class Reminder
     public function setChannels(array $channels): self
     {
         $this->channels = $channels;
-
         return $this;
     }
 
@@ -218,11 +193,10 @@ class Reminder
     public function setActive(bool $active): self
     {
         $this->active = $active;
-
         return $this;
     }
 
-    public function getCreatedAt(): ?DateTimeInterface
+    public function getCreatedAt(): DateTimeInterface
     {
         return $this->created_at;
     }
@@ -230,12 +204,16 @@ class Reminder
     public function setCreatedAt(DateTimeInterface $created_at): self
     {
         $this->created_at = $created_at;
-
         return $this;
     }
 
     public function isCyclic(): bool
     {
         return $this->cyclic ? true : false;
+    }
+
+    public function hasPreReminder(): bool
+    {
+        return $this->pre_reminder ? true : false;
     }
 }

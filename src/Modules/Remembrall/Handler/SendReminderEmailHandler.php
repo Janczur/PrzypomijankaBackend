@@ -4,7 +4,7 @@ namespace App\Modules\Remembrall\Handler;
 
 use App\Modules\Remembrall\Message\SendReminderEmail;
 use App\Modules\Remembrall\Repository\ReminderRepositoryInterface;
-use App\Modules\Remembrall\Utils\ReminderTimeCalculatorInterface;
+use App\Modules\Remembrall\Utils\ReminderCalculator;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
@@ -20,19 +20,19 @@ final class SendReminderEmailHandler implements MessageHandlerInterface, LoggerA
     private LoggerInterface $logger;
     private MailerInterface $mailer;
     private EntityManagerInterface $em;
-    private ReminderTimeCalculatorInterface $reminderTimeCalculator;
+    private ReminderCalculator $reminderCalculator;
 
     public function __construct(
         ReminderRepositoryInterface $reminderRepository,
         MailerInterface $mailer,
         EntityManagerInterface $em,
-        ReminderTimeCalculatorInterface $reminderTimeCalculator
+        ReminderCalculator $reminderCalculator
     )
     {
         $this->reminderRepository = $reminderRepository;
         $this->mailer = $mailer;
         $this->em = $em;
-        $this->reminderTimeCalculator = $reminderTimeCalculator;
+        $this->reminderCalculator = $reminderCalculator;
     }
 
 
@@ -64,7 +64,8 @@ final class SendReminderEmailHandler implements MessageHandlerInterface, LoggerA
             return;
         }
 
-        $nextRemindAt = $this->reminderTimeCalculator->calculateNextReminderDate($reminder);
+        // @todo wyciągnąć obliczanie następnego przypomnienia poza ten handler - to nie jego odpowiedzialność
+        $nextRemindAt = $this->reminderCalculator->calculateNextReminderDate($reminder);
         $reminder->setRemindAt($nextRemindAt);
         $this->em->persist($reminder);
         $this->em->flush();

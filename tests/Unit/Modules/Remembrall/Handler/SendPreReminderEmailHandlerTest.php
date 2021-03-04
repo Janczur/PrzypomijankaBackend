@@ -29,8 +29,7 @@ class SendPreReminderEmailHandlerTest extends KernelTestCase
         $this->mailer = $this->createMock(MailerInterface::class);
         $this->handler = new SendPreReminderEmailHandler(
             $reminderRepository,
-            $this->mailer,
-            $em
+            $this->mailer
         );
 
         $logger = $this->createMock(LoggerInterface::class);
@@ -38,7 +37,7 @@ class SendPreReminderEmailHandlerTest extends KernelTestCase
     }
 
     /** @test */
-    public function it_marks_pre_reminder_email_as_sent_after_successful_send(): void
+    public function it_sends_pre_reminder_email_successfully(): void
     {
         /** @var Reminder $reminder */
         $reminder = $this->loadFixtures([ReminderFixtures::class])
@@ -48,8 +47,6 @@ class SendPreReminderEmailHandlerTest extends KernelTestCase
         $handler = $this->handler;
 
         $this->mailer->expects(self::once())->method('send');
-        self::assertFalse($reminder->getPreReminded());
         $handler($message);
-        self::assertTrue($reminder->getPreReminded());
     }
 }

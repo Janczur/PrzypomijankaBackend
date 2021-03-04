@@ -9,7 +9,7 @@ use DateInterval;
 use DateTime;
 use DateTimeInterface;
 
-class ReminderTimeCalculator implements ReminderTimeCalculatorInterface
+final class ReminderCalculator
 {
 
     public function getRemainingMillisecondsUntil(DateTimeInterface $dateTime): int
@@ -22,7 +22,7 @@ class ReminderTimeCalculator implements ReminderTimeCalculatorInterface
     {
         $cyclic = $reminder->getCyclic();
         $periodicity = $cyclic->getPeriodicity();
-        $cyclicType = $cyclic->getType()->getFirstLetterOfTypeName();
+        $cyclicType = $cyclic->getFirstLetterOfTypeName();
         $now = new DateTime();
         $interval = new DateInterval("P{$periodicity}{$cyclicType}");
         return $now->add($interval);

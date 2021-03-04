@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Modules\Remembrall\Command;
 
 use App\DataFixtures\Modules\Remembrall\Entity\ReminderFixtures;
 use App\Modules\Remembrall\Command\ScheduleTodaysPreRemindersCommand;
+use App\Modules\Remembrall\Entity\PreReminder;
 use App\Modules\Remembrall\Entity\Reminder;
 use Liip\TestFixturesBundle\Test\FixturesTrait;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -25,7 +26,7 @@ class ScheduleTodaysPreRemindersCommandTest extends KernelTestCase
         $application = new Application($kernel);
 
         $em = $kernel->getContainer()->get('doctrine')->getManager();
-        $reminderRepository = $em->getRepository(Reminder::class);
+        $reminderRepository = $em->getRepository(PreReminder::class);
         $dispatcher = $this->createMock(EventDispatcherInterface::class);
         $schedulePreRemindersCommand = new ScheduleTodaysPreRemindersCommand($reminderRepository, $dispatcher);
         $application->add($schedulePreRemindersCommand);

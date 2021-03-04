@@ -62,12 +62,6 @@ class ReminderController extends AbstractController
         if ($validationErrors = $this->validateReminder($reminder)) {
             return $this->json($validationErrors, 400);
         }
-        if ($reminder->isCyclic()) {
-            $cyclicType = $em->getRepository(CyclicType::class)->findOneBy(
-                ['name' => $reminder->getCyclic()->getType()->getName()]
-            );
-            $reminder->getCyclic()->setType($cyclicType);
-        }
         $reminder->setUser($this->getUser());
         $em->persist($reminder);
         $em->flush();
@@ -88,7 +82,10 @@ class ReminderController extends AbstractController
         if (count($cyclicValidationErrors) > 0) {
             return $cyclicValidationErrors;
         }
-        $cyclicTypeValidationErrors = $this->validator->validate($reminder->getCyclic()->getType());
+        if (!$reminder->hasPreReminder()){
+            return false;
+        }
+        $cyclicTypeValidationErrors = $this->validator->validate($reminder->getPreReminder());
         if (count($cyclicTypeValidationErrors) > 0) {
             return $cyclicTypeValidationErrors;
         }
@@ -105,19 +102,13 @@ class ReminderController extends AbstractController
         if ($validationErrors = $this->validateReminder($updatedReminder)) {
             return $this->json($validationErrors, 400);
         }
-        if ($reminder->isCyclic()) {
-            $cyclicType = $em->getRepository(CyclicType::class)->findOneBy(
-                ['name' => $updatedReminder->getCyclic()->getType()->getName()]
-            );
-            $updatedReminder->getCyclic()->setType($cyclicType);
-            $reminder->setCyclic($updatedReminder->getCyclic());
-        }
-        $reminder->setTitle($updatedReminder->getTitle())
-            ->setDescription($updatedReminder->getDescription())
-            ->setRemindAt($updatedReminder->getRemindAt())
-            ->setPreRemindAt($updatedReminder->getPreRemindAt())
-            ->setChannels($updatedReminder->getChannels())
-            ->setActive($updatedReminder->getActive());
+        $updatedReminder->getTitle() && $reminder->setTitle($updatedReminder->getTitle());
+        $updatedReminder->getDescription() && $reminder->setDescription($updatedReminder->getDescription());
+        $updatedReminder->getCyclic() && $reminder->setCyclic($updatedReminder->getCyclic());
+        $updatedReminder->getPreReminder() && $reminder->setPreReminder($updatedReminder->getPreReminder());
+        $updatedReminder->getRemindAt() && $reminder->setRemindAt($updatedReminder->getRemindAt());
+        $updatedReminder->getChannels() && $reminder->setChannels($updatedReminder->getChannels());
+        $reminder->setActive($updatedReminder->getActive());
         $em->flush();
         $normalizedReminder = $this->serializer->normalize($reminder, 'json', ['groups' => 'reminder:read']);
         return $this->json($normalizedReminder);

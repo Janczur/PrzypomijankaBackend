@@ -49,20 +49,16 @@ class ReminderControllerTest extends WebTestCase
         $this->loginAsTestUser();
 
         $oneTimeReminder = $this->getOneTimeReminderData();
-        $this->client->request('POST', 'reminders/save', [], [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode($oneTimeReminder)
-        );
+        $responseBody = $this->saveReminderRequest($oneTimeReminder);
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('Content-Type', 'application/json');
-        $responseBody = json_decode($this->client->getResponse()->getContent(), true);
         self::assertEquals($oneTimeReminder['title'], $responseBody['title']);
         self::assertEquals($oneTimeReminder['description'], $responseBody['description']);
         self::assertEquals($oneTimeReminder['channels'], $responseBody['channels']);
         self::assertEquals($oneTimeReminder['cyclic'], $responseBody['cyclic']);
+        self::assertEquals($oneTimeReminder['pre_reminder'], $responseBody['pre_reminder']);
         self::assertEquals($oneTimeReminder['remind_at'], $responseBody['remind_at']);
         self::assertTrue($responseBody['active']);
-        self::assertFalse($responseBody['pre_reminded']);
     }
 
     private function loginAsTestUser(): void
@@ -80,6 +76,7 @@ class ReminderControllerTest extends WebTestCase
             'title' => 'Test title',
             'description' => 'Test description',
             'cyclic' => null,
+            'pre_reminder' => null,
             'channels' => ['email', 'sms'],
             'remind_at' => $this->getValidRemindAtDate()
         ];
@@ -96,7 +93,6 @@ class ReminderControllerTest extends WebTestCase
         $this->loginAsTestUser();
         $reminderData = [
             'title' => '',
-            'remind_at' => $this->getValidRemindAtDate()
         ];
         $responseBody = $this->saveReminderRequest($reminderData);
         self::assertResponseStatusCodeSame(400);
@@ -118,7 +114,6 @@ class ReminderControllerTest extends WebTestCase
         $this->loginAsTestUser();
         $reminderData = [
             'description' => 'as',
-            'remind_at' => $this->getValidRemindAtDate()
         ];
         $responseBody = $this->saveReminderRequest($reminderData);
         self::assertResponseStatusCodeSame(400);
@@ -131,7 +126,6 @@ class ReminderControllerTest extends WebTestCase
         $this->loginAsTestUser();
         $reminderData = [
             'channels' => ['email', 'slack'],
-            'remind_at' => $this->getValidRemindAtDate()
         ];
         $responseBody = $this->saveReminderRequest($reminderData);
         self::assertResponseStatusCodeSame(400);
@@ -151,16 +145,18 @@ class ReminderControllerTest extends WebTestCase
     }
 
     /** @test */
-    public function a_reminder_pre_remind_at_date_must_be_valid(): void
+    public function a_pre_reminder_days_before_must_be_valid(): void
     {
         $this->loginAsTestUser();
         $reminderData = [
-            'pre_remind_at' => (new DateTime())->format('Y-m-d H:i:s'),
-            'remind_at' => $this->getValidRemindAtDate()
+            'cyclic' => [],
+            'pre_reminder' => [
+                'days_before' => 0
+            ],
         ];
         $responseBody = $this->saveReminderRequest($reminderData);
         self::assertResponseStatusCodeSame(400);
-        self::assertCount(1, $responseBody['violations']);
+        self::assertEquals('days_before: This value should be positive.', $responseBody['detail']);
     }
 
     /** @test */
@@ -171,7 +167,7 @@ class ReminderControllerTest extends WebTestCase
             'cyclic' => [
                 'periodicity' => -2
             ],
-            'remind_at' => $this->getValidRemindAtDate()
+            'pre_reminder' => []
         ];
         $responseBody = $this->saveReminderRequest($reminderData);
         self::assertResponseStatusCodeSame(400);
@@ -184,15 +180,12 @@ class ReminderControllerTest extends WebTestCase
         $this->loginAsTestUser();
         $reminderData = [
             'cyclic' => [
-                'type' => [
-                    'name' => 'półrocze'
-                ]
+                'type_id' => 0
             ],
-            'remind_at' => $this->getValidRemindAtDate()
         ];
         $responseBody = $this->saveReminderRequest($reminderData);
         self::assertResponseStatusCodeSame(400);
-        self::assertEquals('name: The value you selected is not a valid choice.', $responseBody['detail']);
+        self::assertEquals('type_id: The value you selected is not a valid choice.', $responseBody['detail']);
     }
 
 }

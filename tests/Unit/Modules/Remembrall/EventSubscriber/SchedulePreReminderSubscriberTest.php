@@ -13,7 +13,8 @@ use App\Modules\Remembrall\Message\SendPreReminderEmail;
 use App\Modules\Remembrall\Message\SendPreReminderSms;
 use App\Modules\Remembrall\Message\SendReminderEmail;
 use App\Modules\Remembrall\Message\SendReminderSms;
-use App\Modules\Remembrall\Utils\ReminderTimeCalculatorInterface;
+use App\Modules\Remembrall\Utils\ReminderCalculator;
+use App\Modules\Remembrall\Utils\ReminderCalculatorInterface;
 use Liip\TestFixturesBundle\Test\FixturesTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -36,7 +37,7 @@ class SchedulePreReminderSubscriberTest extends KernelTestCase
             ->getReferenceRepository()
             ->getReference(ReminderFixtures::getReferenceKey(0));
 
-        $reminderTimeCalculator = $this->createMock(ReminderTimeCalculatorInterface::class);
+        $reminderTimeCalculator = new ReminderCalculator();
         $scheduleReminderSubscriber = new ScheduleReminderSubscriber($this->messageBus, $reminderTimeCalculator);
         $this->dispatcher->addSubscriber($scheduleReminderSubscriber);
     }
@@ -98,7 +99,7 @@ class SchedulePreReminderSubscriberTest extends KernelTestCase
             ->method('dispatch')
             ->willReturn(new Envelope($expectedMessage));
 
-        $event = new SchedulePreReminderEvent($this->reminder);
+        $event = new SchedulePreReminderEvent($this->reminder->getPreReminder());
         $this->dispatcher->dispatch($event, $event::NAME);
     }
 
@@ -113,7 +114,7 @@ class SchedulePreReminderSubscriberTest extends KernelTestCase
             ->method('dispatch')
             ->willReturn(new Envelope($expectedMessage));
 
-        $event = new SchedulePreReminderEvent($this->reminder);
+        $event = new SchedulePreReminderEvent($this->reminder->getPreReminder());
         $this->dispatcher->dispatch($event, $event::NAME);
     }
 

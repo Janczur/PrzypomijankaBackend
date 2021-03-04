@@ -9,14 +9,6 @@ use DateTimeInterface;
 
 interface ReminderRepositoryInterface
 {
-
-    /**
-     * @param DateTimeInterface $from
-     * @param DateTimeInterface $to
-     * @return Reminder[]
-     */
-    public function getAllPreRemindersToBeSendBetween(DateTimeInterface $from, DateTimeInterface $to): array;
-
     /**
      * @param DateTimeInterface $from
      * @param DateTimeInterface $to

@@ -11,20 +11,23 @@ use App\Modules\Remembrall\Message\SendPreReminderEmail;
 use App\Modules\Remembrall\Message\SendPreReminderSms;
 use App\Modules\Remembrall\Message\SendReminderEmail;
 use App\Modules\Remembrall\Message\SendReminderSms;
-use App\Modules\Remembrall\Utils\ReminderTimeCalculatorInterface;
+use App\Modules\Remembrall\Utils\ReminderCalculator;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 
-class ScheduleReminderSubscriber implements EventSubscriberInterface
+class ScheduleReminderSubscriber implements EventSubscriberInterface, LoggerAwareInterface
 {
     private MessageBusInterface $bus;
-    private ReminderTimeCalculatorInterface $reminderTimeCalculator;
+    private ReminderCalculator $reminderCalculator;
+    private LoggerInterface $logger;
 
-    public function __construct(MessageBusInterface $bus, ReminderTimeCalculatorInterface $reminderTimeCalculator)
+    public function __construct(MessageBusInterface $bus, ReminderCalculator $reminderCalculator)
     {
         $this->bus = $bus;
-        $this->reminderTimeCalculator = $reminderTimeCalculator;
+        $this->reminderCalculator = $reminderCalculator;
     }
 
     public static function getSubscribedEvents(): array
@@ -43,12 +46,19 @@ class ScheduleReminderSubscriber implements EventSubscriberInterface
 
     public function schedulePreReminderEmail(SchedulePreReminderEvent $event): void
     {
-        $reminder = $event->getReminder();
+        $preReminder = $event->getPreReminder();
+        if (!$reminder = $preReminder->getReminder()) {
+            $this->logger->error(
+                'System próbował wysłać wiadomość email Przed Przypomnienia Przypomnienia, które nie istnieje. ID Przed Przypomnienia: {id}',
+                ['id' => $preReminder->getId()]
+            );
+            return;
+        }
         if (!$this->supports(Reminder::EMAIL_CHANNEL, $reminder->getChannels())) {
             return;
         }
         $message = new SendPreReminderEmail($reminder);
-        $delay = $this->reminderTimeCalculator->getRemainingMillisecondsUntil($reminder->getPreRemindAt());
+        $delay = $this->reminderCalculator->getRemainingMillisecondsUntil($preReminder->getRemindAt());
         $this->bus->dispatch($message, [
             new DelayStamp($delay)
         ]);
@@ -61,12 +71,19 @@ class ScheduleReminderSubscriber implements EventSubscriberInterface
 
     public function schedulePreReminderSms(SchedulePreReminderEvent $event): void
     {
-        $reminder = $event->getReminder();
+        $preReminder = $event->getPreReminder();
+        if (!$reminder = $preReminder->getReminder()) {
+            $this->logger->error(
+                'System próbował wysłać wiadomość SMS Przed Przypomnienie Przypomnienia, które nie istnieje. ID Przed Przypomnienia: {id}',
+                ['id' => $preReminder->getId()]
+            );
+            return;
+        }
         if (!$this->supports(Reminder::SMS_CHANNEL, $reminder->getChannels())) {
             return;
         }
         $message = new SendPreReminderSms($reminder);
-        $delay = $this->reminderTimeCalculator->getRemainingMillisecondsUntil($reminder->getPreRemindAt());
+        $delay = $this->reminderCalculator->getRemainingMillisecondsUntil($preReminder->getRemindAt());
         $this->bus->dispatch($message, [
             new DelayStamp($delay)
         ]);
@@ -79,7 +96,7 @@ class ScheduleReminderSubscriber implements EventSubscriberInterface
             return;
         }
         $message = new SendReminderEmail($reminder);
-        $delay = $this->reminderTimeCalculator->getRemainingMillisecondsUntil($reminder->getRemindAt());
+        $delay = $this->reminderCalculator->getRemainingMillisecondsUntil($reminder->getRemindAt());
         $this->bus->dispatch($message, [
             new DelayStamp($delay)
         ]);
@@ -92,9 +109,14 @@ class ScheduleReminderSubscriber implements EventSubscriberInterface
             return;
         }
         $message = new SendReminderSms($reminder);
-        $delay = $this->reminderTimeCalculator->getRemainingMillisecondsUntil($reminder->getRemindAt());
+        $delay = $this->reminderCalculator->getRemainingMillisecondsUntil($reminder->getRemindAt());
         $this->bus->dispatch($message, [
             new DelayStamp($delay)
         ]);
+    }
+
+    public function setLogger(LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
     }
 }

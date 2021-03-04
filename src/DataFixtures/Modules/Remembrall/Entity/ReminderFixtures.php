@@ -18,7 +18,8 @@ class ReminderFixtures extends Fixture implements DependentFixtureInterface
     {
         return [
             UserFixtures::class,
-            CyclicFixtures::class
+            CyclicFixtures::class,
+            PreReminderFixtures::class
         ];
     }
 
@@ -39,14 +40,16 @@ class ReminderFixtures extends Fixture implements DependentFixtureInterface
             $reminder->setDescription('Test description');
             $reminder->setUser($user);
             $reminder->setRemindAt($remindAt);
-            $reminder->setPreRemindAt($remindAt);
             $reminder->setChannels(Reminder::SUPPORTED_CHANNELS);
-            if ($i === 0 || $i === 1 || $i === 2 || $i === 3) {
+            if (in_array($i, [0,1,2,3,4])) {
                 $cyclic = $this->getReference(CyclicFixtures::getReferenceKey($i));
+                $preReminder = $this->getReference(PreReminderFixtures::getReferenceKey($i));
             } else {
                 $cyclic = null;
+                $preReminder = null;
             }
             $reminder->setCyclic($cyclic);
+            $reminder->setPreReminder($preReminder);
             $manager->persist($reminder);
             $this->addReference(self::getReferenceKey($i), $reminder);
         }

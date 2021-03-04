@@ -8,7 +8,7 @@ use App\DataFixtures\Modules\Remembrall\Entity\ReminderFixtures;
 use App\Modules\Remembrall\Entity\Reminder;
 use App\Modules\Remembrall\Handler\SendReminderEmailHandler;
 use App\Modules\Remembrall\Message\SendReminderEmail;
-use App\Modules\Remembrall\Utils\ReminderTimeCalculator;
+use App\Modules\Remembrall\Utils\ReminderCalculator;
 use DateInterval;
 use Liip\TestFixturesBundle\Test\FixturesTrait;
 use Psr\Log\LoggerInterface;
@@ -29,7 +29,7 @@ class SendReminderEmailHandlerTest extends KernelTestCase
         $em = $kernel->getContainer()->get('doctrine')->getManager();
         $reminderRepository = $em->getRepository(Reminder::class);
         $this->mailer = $this->createMock(MailerInterface::class);
-        $reminderCalculator = new ReminderTimeCalculator();
+        $reminderCalculator = new ReminderCalculator();
         $this->handler = new SendReminderEmailHandler(
             $reminderRepository,
             $this->mailer,

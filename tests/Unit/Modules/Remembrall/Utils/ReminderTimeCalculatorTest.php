@@ -8,7 +8,7 @@ use App\DataFixtures\Modules\Remembrall\Entity\ReminderFixtures;
 use App\Modules\Remembrall\Entity\Cyclic;
 use App\Modules\Remembrall\Entity\CyclicType;
 use App\Modules\Remembrall\Entity\Reminder;
-use App\Modules\Remembrall\Utils\ReminderTimeCalculator;
+use App\Modules\Remembrall\Utils\ReminderCalculator;
 use DateInterval;
 use DateTime;
 use Liip\TestFixturesBundle\Test\FixturesTrait;
@@ -24,7 +24,7 @@ class ReminderTimeCalculatorTest extends KernelTestCase
         $now = (new DateTime())->getTimestamp();
         $to = new DateTime('+2 day');
         $expectedMilliseconds = ($to->getTimestamp() - $now) * 1000;
-        $reminderCalculator = new ReminderTimeCalculator();
+        $reminderCalculator = new ReminderCalculator();
         $actualMilliseconds = $reminderCalculator->getRemainingMillisecondsUntil($to);
         self::assertEquals($expectedMilliseconds, $actualMilliseconds);
     }
@@ -38,10 +38,10 @@ class ReminderTimeCalculatorTest extends KernelTestCase
             ->getReference(ReminderFixtures::getReferenceKey(0));
         $cyclic = (new Cyclic())
             ->setPeriodicity(3)
-            ->setType((new CyclicType())->setName('Month'));
+            ->setTypeId(Cyclic::MONTH);
         $reminder->setCyclic($cyclic);
         $expectedNextRemindDate = $reminder->getRemindAt()->add(new DateInterval('P3M'));
-        $reminderCalculator = new ReminderTimeCalculator();
+        $reminderCalculator = new ReminderCalculator();
         $reminderCalculator->calculateNextReminderDate($reminder);
         self::assertEquals($expectedNextRemindDate, $reminder->getRemindAt());
     }

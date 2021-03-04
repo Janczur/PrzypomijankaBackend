@@ -4,37 +4,28 @@
 namespace App\Modules\Remembrall\Event;
 
 
-use App\Modules\Remembrall\Entity\Reminder;
+use App\Modules\Remembrall\Entity\PreReminder;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class SchedulePreReminderEvent extends Event
 {
     public const NAME = 'schedule.pre_reminder';
 
-    protected Reminder $reminder;
+    protected PreReminder $preReminder;
 
-    /**
-     * @param Reminder $reminder
-     */
-    public function __construct(Reminder $reminder)
+    public function __construct(PreReminder $preReminder)
     {
-        $this->reminder = $reminder;
+        $this->preReminder = $preReminder;
     }
 
-    /**
-     * @return Reminder
-     */
-    public function getReminder(): Reminder
+    public function getPreReminder(): PreReminder
     {
-        return $this->reminder;
+        return $this->preReminder;
     }
 
-    /**
-     * @param Reminder $reminder
-     */
-    public function setReminder(Reminder $reminder): void
+    public function setPreReminder(PreReminder $preReminder): void
     {
-        $this->reminder = $reminder;
+        $this->preReminder = $preReminder;
     }
 
 }
