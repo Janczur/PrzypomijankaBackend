@@ -19,20 +19,14 @@ final class SendReminderEmailHandler implements MessageHandlerInterface, LoggerA
     private ReminderRepositoryInterface $reminderRepository;
     private LoggerInterface $logger;
     private MailerInterface $mailer;
-    private EntityManagerInterface $em;
-    private ReminderCalculator $reminderCalculator;
 
     public function __construct(
         ReminderRepositoryInterface $reminderRepository,
-        MailerInterface $mailer,
-        EntityManagerInterface $em,
-        ReminderCalculator $reminderCalculator
+        MailerInterface $mailer
     )
     {
         $this->reminderRepository = $reminderRepository;
         $this->mailer = $mailer;
-        $this->em = $em;
-        $this->reminderCalculator = $reminderCalculator;
     }
 
 
@@ -63,12 +57,6 @@ final class SendReminderEmailHandler implements MessageHandlerInterface, LoggerA
             );
             return;
         }
-
-        // @todo wyciągnąć obliczanie następnego przypomnienia poza ten handler - to nie jego odpowiedzialność
-        $nextRemindAt = $this->reminderCalculator->calculateNextReminderDate($reminder);
-        $reminder->setRemindAt($nextRemindAt);
-        $this->em->persist($reminder);
-        $this->em->flush();
     }
 
     public function setLogger(LoggerInterface $logger): void

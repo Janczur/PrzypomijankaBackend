@@ -33,4 +33,19 @@ class ReminderRepository extends ServiceEntityRepository implements ReminderRepo
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAllCyclicRemindersToBeSendBetween(DateTimeInterface $from, DateTimeInterface $to): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.remind_at BETWEEN :from AND :to')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->andWhere('r.cyclic is not null')
+            ->andWhere('r.active = 1')
+            ->getQuery()
+            ->getResult();
+    }
 }

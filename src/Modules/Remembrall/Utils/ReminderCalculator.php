@@ -23,8 +23,16 @@ final class ReminderCalculator
         $cyclic = $reminder->getCyclic();
         $periodicity = $cyclic->getPeriodicity();
         $cyclicType = $cyclic->getFirstLetterOfTypeName();
-        $now = new DateTime();
+        $remindAt = clone $reminder->getRemindAt();
         $interval = new DateInterval("P{$periodicity}{$cyclicType}");
-        return $now->add($interval);
+        return $remindAt->add($interval);
+    }
+
+    public function calculateNextPreReminderDate(Reminder $reminder): DateTimeInterface
+    {
+        $remindBeforeDays = $reminder->getPreReminder()->getDaysBefore();
+        $interval = new DateInterval("P{$remindBeforeDays}D");
+        $remindAt = clone $reminder->getRemindAt();
+        return $remindAt->sub($interval);
     }
 }

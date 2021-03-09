@@ -14,15 +14,11 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class ScheduleTodaysRemindersCommand extends Command
 {
     protected static $defaultName = 'remembrall:schedule-reminders';
+    protected static string $defaultDescription = 'It schedules all reminders that should be send today';
 
     private ReminderRepositoryInterface $reminderRepository;
-
     private EventDispatcherInterface $eventDispatcher;
 
-    /**
-     * @param ReminderRepositoryInterface $reminderRepository
-     * @param EventDispatcherInterface $eventDispatcher
-     */
     public function __construct(ReminderRepositoryInterface $reminderRepository, EventDispatcherInterface $eventDispatcher)
     {
         $this->reminderRepository = $reminderRepository;
@@ -33,21 +29,23 @@ class ScheduleTodaysRemindersCommand extends Command
 
     protected function configure(): void
     {
-        $this->setDescription('It schedules all reminders that should be send today');
+        $this->setDescription(self::$defaultDescription);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        $today = new DateTime('today');
-        $tomorrow = new DateTime('tomorrow');
-        $reminders = $this->reminderRepository->getAllRemindersToBeSendBetween($today, $tomorrow);
+        $reminders = $this->reminderRepository->getAllRemindersToBeSendBetween(new DateTime('today'), new DateTime('tomorrow'));
+        if (($remindersCount = count($reminders)) < 1) {
+            $io->info('Brak przypomnień do zaplanowania wysyłki');
+            return Command::SUCCESS;
+        }
         foreach ($reminders as $reminder) {
             $event = new ScheduleReminderEvent($reminder);
             $this->eventDispatcher->dispatch($event, ScheduleReminderEvent::NAME);
         }
-        $io->success('Zlecono zaplanowanie wysyłki ' . count($reminders) . ' przypomnień');
+        $io->success('Zlecono zaplanowanie wysyłki ' . $remindersCount . ' przypomnień');
         return Command::SUCCESS;
     }
 }

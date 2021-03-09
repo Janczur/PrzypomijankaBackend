@@ -147,7 +147,7 @@ class Reminder
         return $this;
     }
 
-    public function getRemindAt(): ?DateTimeInterface
+    public function getRemindAt(): DateTimeInterface
     {
         return $this->remind_at;
     }

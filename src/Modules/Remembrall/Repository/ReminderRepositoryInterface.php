@@ -15,4 +15,11 @@ interface ReminderRepositoryInterface
      * @return Reminder[]
      */
     public function getAllRemindersToBeSendBetween(DateTimeInterface $from, DateTimeInterface $to): array;
+
+    /**
+     * @param DateTimeInterface $from
+     * @param DateTimeInterface $to
+     * @return Reminder[]
+     */
+    public function getAllCyclicRemindersToBeSendBetween(DateTimeInterface $from, DateTimeInterface $to): array;
 }

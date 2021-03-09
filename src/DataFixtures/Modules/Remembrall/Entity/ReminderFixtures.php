@@ -31,10 +31,10 @@ class ReminderFixtures extends Fixture implements DependentFixtureInterface
             $remindAt = new DateTime();
             if ($i % 2 === 0) {
                 $user = $this->getReference(UserFixtures::ADMIN_USER_REFERENCE);
-                $remindAt->sub($interval); // x day before today
+                $remindAt->add($interval); // x days after today
             } else {
                 $user = $this->getReference(UserFixtures::USER_REFERENCE);
-                $remindAt->add($interval); // x days after today
+                $remindAt->sub($interval); // x day before today
             }
             $reminder->setTitle('Test title');
             $reminder->setDescription('Test description');

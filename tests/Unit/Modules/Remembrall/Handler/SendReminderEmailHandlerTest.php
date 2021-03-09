@@ -42,7 +42,7 @@ class SendReminderEmailHandlerTest extends KernelTestCase
     }
 
     /** @test */
-    public function it_correctly_calculates_the_date_of_the_next_reminder_after_successful_send(): void
+    public function it_correctly_sends_reminder_via_email(): void
     {
         /** @var Reminder $reminder */
         $reminder = $this->loadFixtures([ReminderFixtures::class])
@@ -51,12 +51,7 @@ class SendReminderEmailHandlerTest extends KernelTestCase
         $message = new SendReminderEmail($reminder);
         $handler = $this->handler;
 
-        $expectedNextRemindAt = $reminder->getRemindAt()->add(new DateInterval('P1D'));
         $this->mailer->expects(self::once())->method('send');
         $handler($message);
-        self::assertEquals(
-            $expectedNextRemindAt->getTimestamp(), $reminder->getRemindAt()->getTimestamp(),
-            'The date of the next reminder cyclic reminder was incorrectly calculated'
-        );
     }
 }
