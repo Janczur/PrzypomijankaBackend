@@ -27,7 +27,6 @@ class PreReminderRepository extends ServiceEntityRepository implements PreRemind
     {
         return $this->createQueryBuilder('pr')
             ->join('pr.reminder', 'reminder')
-            ->andWhere('reminder.active = 1')
             ->andWhere('pr.remind_at BETWEEN :from AND :to')
             ->setParameter('from', $from)
             ->setParameter('to', $to)

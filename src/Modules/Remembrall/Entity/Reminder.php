@@ -80,13 +80,6 @@ class Reminder
     private array $channels = [];
 
     /**
-     * @ORM\Column(type="boolean")
-     * @Assert\Type("boolean")
-     * @Groups("reminder:read")
-     */
-    private bool $active = true;
-
-    /**
      * @ORM\Column(type="datetime")
      * @Groups("reminder:read")
      */
@@ -182,17 +175,6 @@ class Reminder
     public function setChannels(array $channels): self
     {
         $this->channels = $channels;
-        return $this;
-    }
-
-    public function getActive(): ?bool
-    {
-        return $this->active;
-    }
-
-    public function setActive(bool $active): self
-    {
-        $this->active = $active;
         return $this;
     }
 

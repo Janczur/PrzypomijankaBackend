@@ -29,7 +29,6 @@ class ReminderRepository extends ServiceEntityRepository implements ReminderRepo
             ->andWhere('r.remind_at BETWEEN :from AND :to')
             ->setParameter('from', $from)
             ->setParameter('to', $to)
-            ->andWhere('r.active = 1')
             ->getQuery()
             ->getResult();
     }
@@ -44,7 +43,6 @@ class ReminderRepository extends ServiceEntityRepository implements ReminderRepo
             ->setParameter('from', $from)
             ->setParameter('to', $to)
             ->andWhere('r.cyclic is not null')
-            ->andWhere('r.active = 1')
             ->getQuery()
             ->getResult();
     }
