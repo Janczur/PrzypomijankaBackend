@@ -58,7 +58,6 @@ class ReminderControllerTest extends WebTestCase
         self::assertEquals($oneTimeReminder['cyclic'], $responseBody['cyclic']);
         self::assertEquals($oneTimeReminder['pre_reminder'], $responseBody['pre_reminder']);
         self::assertEquals($oneTimeReminder['remind_at'], $responseBody['remind_at']);
-        self::assertTrue($responseBody['active']);
     }
 
     private function loginAsTestUser(): void

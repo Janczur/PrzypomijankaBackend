@@ -108,7 +108,6 @@ class ReminderController extends AbstractController
         $updatedReminder->getPreReminder() && $reminder->setPreReminder($updatedReminder->getPreReminder());
         $updatedReminder->getRemindAt() && $reminder->setRemindAt($updatedReminder->getRemindAt());
         $updatedReminder->getChannels() && $reminder->setChannels($updatedReminder->getChannels());
-        $reminder->setActive($updatedReminder->getActive());
         $em->flush();
         $normalizedReminder = $this->serializer->normalize($reminder, 'json', ['groups' => 'reminder:read']);
         return $this->json($normalizedReminder);
